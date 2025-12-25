@@ -1,0 +1,38 @@
+name: Build QMK Firmware
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "keyboards/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout QMK
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install QMK
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install qmk
+          qmk setup -y
+
+      - name: Build firmware
+        run: |
+          qmk compile -kb lyric/macropad5 -km default
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: |
+            *.uf2
+            *.bin
